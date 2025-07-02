@@ -1,0 +1,11 @@
+exclude:
+  - node_modules
+  - project/node_modules
+  - vendor
+  - Gemfile
+  - Gemfile.lock
+  - package.json
+  - package-lock.json
+  - yarn.lock
+  - README.md
+  - LICENSE
