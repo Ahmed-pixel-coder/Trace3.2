@@ -1,21 +1,17 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getTeamAccess, setTeamAccess } from '../database'; // Adjust path if needed
 
-const TEAM_URLS = [
-  '/team/1',
-  '/team/2',
-];
-const LOCK_KEY = 'activeTeamLock';
+const TEAM_URLS = ['/team/1', '/team/2'];
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const handleTeamSelect = (team: number) => {
-    // Use a separate lock for each team
-    const teamLockKey = `${LOCK_KEY}_${team}`;
-    const isLocked = localStorage.getItem(teamLockKey);
+  const handleTeamSelect = async (team: number) => {
+    const teamName = `TEAM ${team}`;
+    const isLocked = await getTeamAccess(teamName);
     if (!isLocked) {
-      localStorage.setItem(teamLockKey, 'locked');
+      await setTeamAccess(teamName, true);
       navigate(TEAM_URLS[team - 1]);
     } else {
       alert(`Team ${team} interface is currently in use. Please wait until it is free.`);
@@ -37,7 +33,9 @@ const LandingPage: React.FC = () => {
           </div>
         ))}
       </div>
-      <p className="mt-8 text-gray-400 text-center">Each team can only use their own interface at a time. Use the release button if you need to free up an interface.</p>
+      <p className="mt-8 text-gray-400 text-center">
+        Each team can only use their own interface at a time. Use the release button if you need to free up an interface.
+      </p>
     </div>
   );
 };

@@ -61,7 +61,7 @@ const CodeInputPanel: React.FC<CodeInputPanelProps> = ({
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-green-400 mb-2 flex items-center">
+          <label className="text-sm font-medium text-green-400 mb-2 flex items-center">
             <Key className="w-4 h-4 mr-1" />
             ACCESS CODE
           </label>

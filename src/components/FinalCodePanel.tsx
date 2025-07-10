@@ -1,3 +1,4 @@
+import { setTeamAccess } from '../database';
 import React, { useState } from 'react';
 import { useGame } from '../contexts/GameContext';
 import { Shield, Users, Key, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -62,16 +63,14 @@ const FinalCodePanel: React.FC<FinalCodePanelProps> = ({ team }) => {
           <div className="flex gap-8 justify-center mt-8">
             {[1, 2].map((team) => (
               <button
-                key={team}
-                className="px-6 py-2 bg-gray-700 text-green-400 rounded font-bold text-base hover:bg-gray-600 transition-all"
-                onClick={() => {
-                  const teamLockKey = `activeTeamLock_${team}`;
-                  localStorage.removeItem(teamLockKey);
-                  localStorage.removeItem('trace32-puzzle-game'); // Clear saved progress on release
-                  alert(`Team ${team} interface has been released.`);
+                onClick={async () => {
+                  await setTeamAccess(`TEAM ${team}`, false); 
+                  alert(`TEAM ${team} interface has been released.`);
+
                 }}
-              >
-                Release Team {team} Interface
+                className="px-6 py-2 bg-gray-200 text-green-400 hover:bg-gray-600 transition-all rounded font-bold text-base"
+>
+                Release Team {team}
               </button>
             ))}
           </div>
