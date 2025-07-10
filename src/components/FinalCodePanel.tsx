@@ -1,4 +1,4 @@
-import { setTeamAccess } from '../database';
+import { setTeamAccess } from '../utils/teamAccess';
 import React, { useState } from 'react';
 import { useGame } from '../contexts/GameContext';
 import { Shield, Users, Key, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -13,9 +13,11 @@ const FinalCodePanel: React.FC<FinalCodePanelProps> = ({ team }) => {
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  const teamState = gameState[`team${team}` as 'team1' | 'team2'];
+  const teamKey = team === 1 ? 'team1' : 'team2';
+  const otherTeamKey = team === 1 ? 'team2' : 'team1';
+  const teamState = gameState[teamKey];
   const otherTeam = team === 1 ? 2 : 1;
-  const otherTeamState = gameState[`team${otherTeam}` as 'team1' | 'team2'];
+  const otherTeamState = gameState[otherTeamKey];
   
   const bothTeamsReady = teamState.completedPuzzles.length === 3 && 
                          otherTeamState.completedPuzzles.length === 3;

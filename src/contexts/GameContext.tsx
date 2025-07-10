@@ -22,6 +22,16 @@ interface GameContextType {
   updateTeamState: (team: number, newState: Partial<TeamState>) => void;
 }
 
+const GameContext = createContext<GameContextType | undefined>(undefined);
+
+export function useGame() {
+  const context = useContext(GameContext);
+  if (!context) {
+    throw new Error('useGame must be used within a GameProvider');
+  }
+  return context;
+}
+
 export function GameProvider(): void {
   const [gameState, setGameState] = useState<GameState>({
     team1: {
