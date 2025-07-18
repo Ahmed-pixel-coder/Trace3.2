@@ -1,4 +1,3 @@
-import { setTeamAccess } from '../utils/teamAccess';
 import React, { useState } from 'react';
 import { useGame } from '../contexts/GameContext';
 import { Shield, Users, Key, CheckCircle, AlertTriangle } from 'lucide-react';
@@ -6,6 +5,20 @@ import { Shield, Users, Key, CheckCircle, AlertTriangle } from 'lucide-react';
 interface FinalCodePanelProps {
   team: number;
 }
+
+// Import TEAM_LOCATIONS definition
+const TEAM_LOCATIONS = {
+  1: [
+    { coords: '30.9948304, 29.5883294', name: 'LOCATION ALPHA', code: 'T-30' },
+    { coords: '30.9942944, 29.5903226', name: 'LOCATION BETA', code: 'M-94' },
+    { coords: '30.9982094, 29.5861847', name: 'LOCATION GAMMA', code: 'F-26' },
+  ],
+  2: [
+    { coords: '30.9953647, 29.5882855', name: 'LOCATION ALPHA', code: 'I-78' },
+    { coords: '30.9960832, 29.5871697', name: 'LOCATION BETA', code: 'K-55' },
+    { coords: '30.9926352, 29.5926813', name: 'LOCATION GAMMA', code: 'R-13' },
+  ],
+};
 
 const FinalCodePanel: React.FC<FinalCodePanelProps> = ({ team }) => {
   const { gameState, unlockFinalLocation } = useGame();
@@ -30,6 +43,12 @@ const FinalCodePanel: React.FC<FinalCodePanelProps> = ({ team }) => {
     setError('');
 
     await new Promise(resolve => setTimeout(resolve, 1500));
+
+    if (!bothTeamsReady) {
+      setError('Both teams must complete all puzzles before the final code can be accepted.');
+      setIsSubmitting(false);
+      return;
+    }
 
     if (finalCode.trim().toUpperCase() === 'B-06') {
       unlockFinalLocation();
@@ -66,7 +85,7 @@ const FinalCodePanel: React.FC<FinalCodePanelProps> = ({ team }) => {
             {[1, 2].map((team) => (
               <button
                 onClick={async () => {
-                  await setTeamAccess(`TEAM ${team}`, false); 
+
                   alert(`TEAM ${team} interface has been released.`);
 
                 }}
@@ -83,64 +102,39 @@ const FinalCodePanel: React.FC<FinalCodePanelProps> = ({ team }) => {
 
   return (
     <div className="min-h-screen bg-black flex items-center justify-center p-4 slow-fade">
-      <div className="terminal-border bg-gray-900 p-8 rounded-lg max-w-2xl w-full">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Shield className="w-12 h-12 text-yellow-400 mr-2" />
-            <div>
-              <h2 className="text-2xl font-bold text-yellow-400">FINAL PROTOCOL</h2>
-              <p className="text-gray-400">Team coordination required</p>
-            </div>
-          </div>
+      {/* WARNING for multi-device limitation */}
+      <div className="absolute top-2 left-1/2 -translate-x-1/2 z-50 w-full max-w-xl px-2">
+        <div className="bg-yellow-900 bg-opacity-80 border border-yellow-500 rounded p-3 text-yellow-200 text-center text-sm font-bold mb-2 shadow-lg">
+          <span className="block mb-1">⚠️ <b>IMPORTANT:</b> Game progress is NOT synchronized between devices. Both teams must play on the <b>same device/browser</b> for the final code to work.</span>
+          <span className="block">(If you want true multi-device play, ask your developer to add a backend or real-time sync!)</span>
         </div>
-
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
-          <div className="bg-black p-6 rounded border border-gray-600">
-            <div className="flex items-center mb-3">
-              <Users className="w-5 h-5 text-green-400 mr-2" />
-              <h3 className="font-bold text-green-400">TEAM {team}</h3>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Puzzles Completed:</span>
-                <span className="text-green-400">{teamState.completedPuzzles.length}/3</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Half-Code:</span>
-                {/* Half-code hidden for final protocol */}
-                <span className="text-gray-500 font-mono text-lg">•••</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-black p-6 rounded border border-gray-600">
-            <div className="flex items-center mb-3">
-              <Users className="w-5 h-5 text-yellow-400 mr-2" />
-              <h3 className="font-bold text-yellow-400">TEAM {otherTeam}</h3>
-            </div>
-            <div className="space-y-2 text-sm">
-              <div className="flex justify-between">
-                <span className="text-gray-400">Puzzles Completed:</span>
-                <span className={otherTeamState.completedPuzzles.length >= 3 ? 'text-green-400' : 'text-yellow-400'}>
-                  {otherTeamState.completedPuzzles.length}/3
-                </span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-gray-400">Half-Code:</span>
-                {/* Half-code hidden for final protocol */}
-                <span className="text-gray-500 font-mono text-lg">•••</span>
-              </div>
-            </div>
-          </div>
+      </div>
+      <div className="terminal-border bg-gray-900 p-4 sm:p-8 rounded-lg max-w-4xl w-full flex flex-col sm:flex-row gap-4 sm:gap-8 items-start overflow-x-auto box-border">
+        {/* Sidebar: Unlocked Locations */}
+        <div className="w-full sm:w-64 bg-black p-2 sm:p-4 rounded border border-green-400 flex-shrink-0 self-start mt-2 overflow-y-auto max-h-[40vh] sm:max-h-[70vh] break-words">
+          <h3 className="text-green-400 font-bold mb-2 text-lg">Unlocked Locations</h3>
+          <ul className="space-y-1">
+  {TEAM_LOCATIONS[team as 1 | 2].map((loc, idx) => (
+    <li key={idx} className="text-green-300 font-mono border-b border-green-700 pb-1 mb-1">
+      <div className="font-bold">{loc.name}</div>
+      <div className="text-xs text-green-500">Coords: {loc.coords}</div>
+    </li>
+  ))}
+</ul>
         </div>
-
-        {!bothTeamsReady ? (
-          <div className="bg-yellow-900 bg-opacity-20 border border-yellow-500 p-6 rounded text-center">
-            <AlertTriangle className="w-8 h-8 text-yellow-400 mx-auto mb-3" />
-            <h3 className="font-bold text-yellow-400 mb-2">WAITING FOR OTHER TEAM</h3>
-            <p className="text-yellow-200">Both teams must complete all puzzles before final protocol.</p>
+        {/* Main Protocol Content */}
+        <div className="flex-1 w-full max-w-xl min-w-0">
+          <div className="text-center mb-8">
+            <div className="flex items-center justify-center mb-4">
+              <Shield className="w-12 h-12 text-yellow-400 mr-2" />
+              <div>
+                <h2 className="text-2xl font-bold text-yellow-400">FINAL PROTOCOL</h2>
+              </div>
+            </div>
+            <p className="text-gray-400">Team coordination required</p>
           </div>
-        ) : (
+
+          {/* Code Assembly Section */}
           <form onSubmit={handleFinalSubmit} className="space-y-6">
             <div className="bg-blue-900 bg-opacity-20 border border-blue-400 p-6 rounded">
               <div className="flex items-start mb-4">
@@ -150,7 +144,7 @@ const FinalCodePanel: React.FC<FinalCodePanelProps> = ({ team }) => {
                   <p className="text-blue-200 text-sm mb-3">
                     Combine both team half-codes to create the complete final access code.
                   </p>
-                  <div className="font-mono text-lg">
+                  <div className="font-mono text-lg break-words">
                     <span className="text-green-400">Team 1: •••</span>
                     <span className="text-gray-400"> + </span>
                     <span className="text-green-400">Team 2: •••</span>
@@ -187,15 +181,15 @@ const FinalCodePanel: React.FC<FinalCodePanelProps> = ({ team }) => {
               type="submit"
               disabled={!finalCode.trim() || isSubmitting}
               className={`w-full p-4 rounded font-bold text-xl transition-all ${
-                finalCode.trim() && !isSubmitting
+                !!finalCode.trim() && !isSubmitting
                   ? 'bg-green-400 bg-opacity-20 border border-green-400 text-green-400 hover:bg-opacity-30 pulse-green'
                   : 'bg-gray-800 border border-gray-600 text-gray-500 cursor-not-allowed'
               }`}
             >
-              {isSubmitting ? 'PROCESSING FINAL CODE...' : 'EXECUTE FINAL PROTOCOL'}
+              Submit Final Code
             </button>
           </form>
-        )}
+        </div>
       </div>
     </div>
   );
