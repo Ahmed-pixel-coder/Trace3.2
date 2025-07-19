@@ -52,3 +52,4 @@ const PasswordPage: React.FC<PasswordPageProps> = ({ onSuccess }) => {
 };
 
 export default PasswordPage;
+

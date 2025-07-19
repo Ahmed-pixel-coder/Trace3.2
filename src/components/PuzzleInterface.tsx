@@ -41,24 +41,22 @@ const PuzzleInterface: React.FC<PuzzleInterfaceProps> = ({ team }) => {
   const currentPuzzleType = puzzles[currentPuzzleIndex];
   const allPuzzlesCompleted = teamState.completedPuzzles.length === 3;
 
-  // Reset flow when moving to a new location
-  React.useEffect(() => {
+  useEffect(() => {
     setShowCodeInput(false);
     setShowLocation(false);
   }, [currentPuzzleIndex]);
 
   const handlePuzzleComplete = () => {
-    setShowCodeInput(true); // Show code input after puzzle is solved
+    setShowCodeInput(true); 
   };
 
   const handleCodeSuccess = () => {
-    // Mark code as entered for this location using context
     const teamKey = `team${team}` as 'team1' | 'team2';
     const codes = [...gameState[teamKey].codes];
     codes[currentPuzzleIndex] = TEAM_LOCATIONS[team as keyof typeof TEAM_LOCATIONS][currentPuzzleIndex].code;
     updateTeamState(team, { codes });
     setShowCodeInput(false);
-    setShowLocation(true); // Show location after code is entered
+    setShowLocation(true); 
   };
 
   const renderPuzzle = () => {
@@ -67,7 +65,6 @@ const PuzzleInterface: React.FC<PuzzleInterfaceProps> = ({ team }) => {
       isCompleted: teamState.completedPuzzles.includes(currentPuzzleIndex),
     };
 
-    // Use alternate puzzle variants for team 2
     if (team === 2) {
       switch (currentPuzzleType) {
         case 'maze':
@@ -165,11 +162,9 @@ const PuzzleInterface: React.FC<PuzzleInterfaceProps> = ({ team }) => {
                   className="mt-6 px-6 py-3 bg-green-400 bg-opacity-20 border border-green-400 rounded text-green-400 font-bold text-lg hover:bg-opacity-30 transition-all pulse-green"
                   onClick={() => {
                     setShowLocation(false);
-                    // Advance to next puzzle/location or finish
                     if (currentPuzzleIndex + 1 < locations.length) {
                       updateTeamState(team, { currentLocation: currentPuzzleIndex + 1 });
                     } else {
-                      // Mark all puzzles as completed to trigger FinalCodePanel
                       updateTeamState(team, { completedPuzzles: [0, 1, 2] });
                     }
                   }}

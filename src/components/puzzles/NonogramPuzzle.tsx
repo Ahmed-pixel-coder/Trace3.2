@@ -35,7 +35,7 @@ const NonogramPuzzle: React.FC<NonogramPuzzleProps> = ({ onComplete, isCompleted
     return currentGrid.every((row, i) =>
       row.every((cell, j) => cell === SOLUTION[i][j])
     );
-  };
+  }
 
   const toggleCell = (row: number, col: number) => {
     if (solved) return;
@@ -48,12 +48,12 @@ const NonogramPuzzle: React.FC<NonogramPuzzleProps> = ({ onComplete, isCompleted
       setSolved(true);
       setTimeout(onComplete, 500);
     }
-  };
+  }
 
   const resetPuzzle = () => {
     setGrid(Array(4).fill(null).map(() => Array(4).fill(0)));
     setSolved(false);
-  };
+  }
 
   return (
     <div className="text-center">
@@ -113,6 +113,6 @@ const NonogramPuzzle: React.FC<NonogramPuzzleProps> = ({ onComplete, isCompleted
       )}
     </div>
   );
-};
+}
 
 export default NonogramPuzzle;
