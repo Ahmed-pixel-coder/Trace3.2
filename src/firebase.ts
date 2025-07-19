@@ -4,7 +4,7 @@ import { getDatabase } from 'firebase/database';
 const firebaseConfig = {
   apiKey: "AIzaSyBMZOgZynZfM-9oWdSy745ISmeRZgkRqJw",
   authDomain: "trace3-2.firebaseapp.com",
-  databaseURL: "https://trace3-2-default-rtdb.firebaseio.com",
+  databaseURL: "https://trace3-2-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "trace3-2",
   storageBucket: "trace3-2.firebasestorage.app",
   messagingSenderId: "871313519157",
