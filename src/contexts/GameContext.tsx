@@ -48,35 +48,84 @@ const GameContext = createContext<GameContextType | undefined>(undefined);
 export const GameProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [gameState, setGameState] = useState<GameState>(defaultState);
 
-  // Listen for changes in Firebase
+  // Initialize and listen for changes in Firebase
   useEffect(() => {
-    const gameRef = ref(db, 'gameState');
-    const unsubscribe = onValue(gameRef, (snapshot) => {
-      const data = snapshot.val();
-      if (data) setGameState(data);
-    });
-    return () => unsubscribe();
+    try {
+      const gameRef = ref(db, 'gameState');
+      // First, set initial state if it doesn't exist
+      set(gameRef, defaultState).catch(error => {
+        console.warn('Error setting initial game state:', error);
+      });
+      
+      // Then listen for changes
+      const unsubscribe = onValue(gameRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+          setGameState({
+            ...defaultState, // Use default values as fallback
+            ...data,         // Override with saved data
+            team1: {
+              ...defaultState.team1,
+              ...(data.team1 || {})
+            },
+            team2: {
+              ...defaultState.team2,
+              ...(data.team2 || {})
+            }
+          });
+        } else {
+          setGameState(defaultState);
+        }
+      }, (error) => {
+        console.error('Firebase read failed:', error);
+      });
+      
+      return () => unsubscribe();
+    } catch (error) {
+      console.error('Firebase initialization error:', error);
+    }
   }, []);
 
-  // Write helpers
+  // Write helpers with error handling
   const completePuzzle = (team: number, puzzleIndex: number) => {
-    const teamKey = team === 1 ? 'team1' : 'team2';
-    const prevCompleted = (gameState[teamKey]?.completedPuzzles || []);
-    // Avoid duplicates
-    if (!prevCompleted.includes(puzzleIndex)) {
-      update(ref(db, `gameState/${teamKey}`), {
-        completedPuzzles: [...prevCompleted, puzzleIndex],
-      });
+    try {
+      const teamKey = team === 1 ? 'team1' : 'team2';
+      const prevCompleted = (gameState[teamKey]?.completedPuzzles || []);
+      
+      // Avoid duplicates
+      if (!prevCompleted.includes(puzzleIndex)) {
+        update(ref(db, `gameState/${teamKey}`), {
+          completedPuzzles: [...prevCompleted, puzzleIndex],
+        }).catch(error => {
+          console.error('Error completing puzzle:', error);
+        });
+      }
+    } catch (error) {
+      console.error('Error in completePuzzle:', error);
     }
   };
 
   const unlockFinalLocation = () => {
-    set(ref(db, 'gameState/finalLocationUnlocked'), true);
+    try {
+      set(ref(db, 'gameState/finalLocationUnlocked'), true)
+        .catch(error => {
+          console.error('Error unlocking final location:', error);
+        });
+    } catch (error) {
+      console.error('Error in unlockFinalLocation:', error);
+    }
   };
 
   const updateTeamState = (team: number, newState: Partial<TeamState>) => {
-    const teamKey = team === 1 ? 'team1' : 'team2';
-    update(ref(db, `gameState/${teamKey}`), newState);
+    try {
+      const teamKey = team === 1 ? 'team1' : 'team2';
+      update(ref(db, `gameState/${teamKey}`), newState)
+        .catch(error => {
+          console.error('Error updating team state:', error);
+        });
+    } catch (error) {
+      console.error('Error in updateTeamState:', error);
+    }
   };
 
   const contextValue: GameContextType = {
