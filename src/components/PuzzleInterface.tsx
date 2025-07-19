@@ -29,17 +29,59 @@ const TEAM_PUZZLES = {
   2: ['maze', 'blocks', 'nonogram'],
 };
 
-const PuzzleInterface: React.FC<PuzzleInterfaceProps> = ({ team }) => {
-  const { gameState, updateTeamState } = useGame();
-  const [showCodeInput, setShowCodeInput] = useState(false); // Start with puzzle first
-  const [showLocation, setShowLocation] = useState(false); // Track if location should be shown
+// Error boundary for the puzzle component
+class ErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false };
+  }
 
-  const teamState = gameState[`team${team}` as 'team1' | 'team2'];
-  const locations = TEAM_LOCATIONS[team as keyof typeof TEAM_LOCATIONS];
-  const puzzles = TEAM_PUZZLES[team as keyof typeof TEAM_PUZZLES];
-  const currentPuzzleIndex = teamState.currentLocation;
-  const currentPuzzleType = puzzles[currentPuzzleIndex];
-  const allPuzzlesCompleted = teamState.completedPuzzles.length === 3;
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    console.error('PuzzleInterface error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <div className="text-red-500 p-4">Something went wrong. Please refresh the page.</div>;
+    }
+    return this.props.children;
+  }
+}
+
+const PuzzleInterface: React.FC<PuzzleInterfaceProps> = ({ team }) => {
+  console.log('PuzzleInterface render - team:', team);
+  const { gameState, updateTeamState } = useGame();
+  const [showCodeInput, setShowCodeInput] = useState(false);
+  const [showLocation, setShowLocation] = useState(false);
+
+  // Add null checks and default values
+  const teamKey = `team${team}` as 'team1' | 'team2';
+  const teamState = gameState?.[teamKey] || {
+    currentLocation: 0,
+    completedPuzzles: [],
+    finalHalfCode: '',
+    unlockedLocations: [],
+    codes: []
+  };
+  
+  const locations = TEAM_LOCATIONS[team as keyof typeof TEAM_LOCATIONS] || [];
+  const puzzles = TEAM_PUZZLES[team as keyof typeof TEAM_PUZZLES] || [];
+  const currentPuzzleIndex = teamState?.currentLocation || 0;
+  const currentPuzzleType = puzzles?.[currentPuzzleIndex] || 'maze';
+  const allPuzzlesCompleted = teamState?.completedPuzzles?.length === 3;
+  
+  console.log('Current state:', {
+    teamState,
+    currentPuzzleIndex,
+    currentPuzzleType,
+    allPuzzlesCompleted,
+    puzzlesCount: puzzles.length,
+    locationsCount: locations.length
+  });
 
   useEffect(() => {
     setShowCodeInput(false);
